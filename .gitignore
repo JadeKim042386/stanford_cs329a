@@ -1,0 +1,6 @@
+.tutor/
+__pycache__/
+.playwright-mcp/
+.DS_Store
+# Lecture transcripts are Stanford content: generate them locally with fetch_transcripts.py
+[0-9]_*.html

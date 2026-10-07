@@ -1,0 +1,66 @@
+/* 공용 테마: 글래스모피즘 + 촉감형(tactile) 버튼. 튜터(index.html)와 스크립트 페이지가 같이 쓴다. */
+:root{
+  --bg:#eef1fb; --fg:#151a2d; --mut:#5d6684; --line:rgba(255,255,255,.75); --line2:rgba(21,26,45,.08);
+  --glass:rgba(255,255,255,.55); --glass2:rgba(255,255,255,.72); --pop:rgba(248,249,255,.97); --me:rgba(99,102,241,.16);
+  --acc:#5b5ff0; --ok:#10b981; --miss:#f59e0b; --bad:#ef4444;
+  --blob:#8e96ff;
+  --shadow:0 10px 30px -12px rgba(30,40,90,.25), 0 2px 6px -2px rgba(30,40,90,.12);
+  --raise:inset 0 1px 0 rgba(255,255,255,.9), 0 1px 0 rgba(21,26,45,.06), 0 4px 10px -4px rgba(30,40,90,.25);
+  --press:inset 0 2px 5px rgba(21,26,45,.18), inset 0 0 0 1px rgba(21,26,45,.04);
+  --spring:cubic-bezier(.34,1.56,.64,1); --r:18px;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0a0d18; --fg:#e8ebf7; --mut:#9aa3c2; --line:rgba(255,255,255,.12); --line2:rgba(255,255,255,.06);
+  --glass:rgba(24,29,48,.55); --glass2:rgba(30,36,60,.72); --pop:rgba(26,31,52,.97); --me:rgba(129,140,248,.22);
+  --acc:#818cf8; --blob:#3a3fa8;
+  --shadow:0 12px 34px -12px rgba(0,0,0,.6), 0 2px 6px -2px rgba(0,0,0,.4);
+  --raise:inset 0 1px 0 rgba(255,255,255,.08), 0 4px 12px -4px rgba(0,0,0,.6);
+  --press:inset 0 2px 6px rgba(0,0,0,.55);
+  color-scheme:dark;
+}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:16px/1.7 Inter,"Noto Sans KR",-apple-system,system-ui,sans-serif;color:var(--fg);background:var(--bg);min-height:100vh;-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:anywhere}
+a{color:var(--acc)}
+/* 배경의 흐르는 빛 덩어리 — 유리 질감이 비칠 대상. 단색(한 가지 색)에 진하기만 다르게 */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg i{position:absolute;width:46vmax;height:46vmax;border-radius:50%;filter:blur(70px);opacity:.75;animation:drift 26s ease-in-out infinite alternate}
+.bg i{background:var(--blob)}
+.bg i:nth-child(1){left:-12vmax;top:-14vmax}
+.bg i:nth-child(2){opacity:.5;right:-14vmax;top:18vh;animation-duration:32s}
+.bg i:nth-child(3){opacity:.35;left:20vw;bottom:-22vmax;animation-duration:38s}
+@keyframes drift{to{transform:translate(6vmax,-4vmax) scale(1.12)}}
+.glass{background:var(--glass);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);-webkit-backdrop-filter:blur(22px) saturate(160%);backdrop-filter:blur(22px) saturate(160%)}
+/* 촉감형 버튼: 떠 있다가 누르면 꺼진다 */
+.btn,.seg button{font:inherit;font-weight:600;font-size:.92rem;color:var(--fg);background:var(--glass2);border:1px solid var(--line);border-radius:12px;padding:.55em 1em;cursor:pointer;box-shadow:var(--raise);transition:transform .25s var(--spring),box-shadow .2s,background .2s,opacity .2s;-webkit-tap-highlight-color:transparent;text-decoration:none;display:inline-flex;align-items:center;gap:.4em;white-space:nowrap}
+.btn:hover{transform:translateY(-1px)}
+.btn:active,.btn.pressed{transform:translateY(1px) scale(.97);box-shadow:var(--press);transition-duration:.06s}
+.btn.primary{background:var(--acc);color:#fff;border-color:transparent;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 6px 16px -6px var(--acc)}
+.btn.primary:active{box-shadow:inset 0 2px 6px rgba(0,0,0,.3)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+.btn:focus-visible,.seg button:focus-visible,select:focus-visible,textarea:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+/* 언어 전환 세그먼트: 선택 표시가 미끄러진다 */
+.seg{position:relative;display:inline-flex;padding:3px;border-radius:12px;background:var(--line2);box-shadow:var(--press)}
+.seg button{position:relative;z-index:1;background:none;border:0;box-shadow:none;padding:.3em .8em;font-size:.82rem;color:var(--mut)}
+.seg button[aria-pressed=true]{color:var(--fg)}
+.seg::before{content:"";position:absolute;top:3px;bottom:3px;left:var(--x,3px);width:var(--w,0);border-radius:9px;background:var(--glass2);box-shadow:var(--raise);transition:left .35s var(--spring),width .35s var(--spring)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* 스크립트 페이지 */
+.bar{position:sticky;top:12px;z-index:5;max-width:860px;margin:12px auto 0;display:flex;justify-content:space-between;align-items:center;padding:8px 10px 8px 16px;gap:8px}
+.back{font-weight:600;text-decoration:none}
+.sheet{max-width:860px;margin:16px auto 48px;padding:clamp(20px,5vw,48px)}
+.kicker{margin:0;color:var(--acc);font-weight:700;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.sheet h1{margin:.2em 0 .3em;font-size:clamp(1.6rem,4vw,2.3rem);line-height:1.25;letter-spacing:-.02em}
+.meta{color:var(--mut);font-size:.9rem;margin:0 0 1.2em}
+.find input{width:100%;font:inherit;padding:.6em .9em;border-radius:12px;border:1px solid var(--line);background:var(--glass2);color:var(--fg);box-shadow:var(--press)}
+#tx{margin-top:1.4em}
+#tx p{margin:0 0 1.1em;padding:.2em .4em;border-radius:10px;transition:background .3s}
+#tx p:target,#tx p.hit{background:var(--me)}
+#tx p[hidden]{display:none}
+.ts{display:inline-block;font:600 .75rem/1 ui-monospace,SFMono-Regular,monospace;color:var(--acc);background:var(--line2);padding:.35em .5em;border-radius:7px;margin-right:.35em;text-decoration:none;vertical-align:.1em;transition:transform .2s var(--spring)}
+.ts:hover{transform:scale(1.08)}
+mark{background:rgba(245,158,11,.35);color:inherit;border-radius:3px}
+@media (max-width:600px){.bar{margin:8px 8px 0;top:8px}.sheet{margin:12px 8px 32px;border-radius:16px}}

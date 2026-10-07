@@ -1,0 +1,285 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>CS329A 4시간 튜터</title><link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<link rel="stylesheet" href="ui.css">
+<style>
+body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
+.wrap{width:100%;max-width:880px;margin:0 auto;padding:0 16px}
+header.glass{margin:14px auto 0;display:flex;align-items:center;gap:12px;padding:10px 12px 10px 18px;flex-wrap:wrap}
+h1{font-size:1.08rem;margin:0;letter-spacing:-.01em;flex:1;min-width:10em}
+h1 small{display:block;font-weight:500;font-size:.78rem;color:var(--mut);letter-spacing:0}
+/* 남은 시간 링 */
+.timer{display:flex;align-items:center;gap:8px;font:700 .95rem ui-monospace,SFMono-Regular,monospace;padding:4px 12px 4px 4px;border-radius:99px;background:var(--line2);box-shadow:var(--press)}
+.ring{width:28px;height:28px;border-radius:50%;background:conic-gradient(var(--acc) calc(var(--p,1)*360deg),var(--line2) 0);display:grid;place-items:center}
+.ring::after{content:"";width:18px;height:18px;border-radius:50%;background:var(--glass2)}
+.timer.low{color:var(--miss)}.timer.low .ring{animation:pulse 1.6s ease-in-out infinite}
+.timer.over{color:var(--bad)}
+@keyframes pulse{50%{transform:scale(1.12)}}
+.tools{position:relative;z-index:10;margin:10px auto 0;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px}
+/* 강의 선택: 네이티브 select 대신 작은 목록(네이티브 펼침 목록은 OS가 그려서 크기 조절이 안 됨) */
+.dd{position:relative;flex:1;min-width:12em}
+.dd-btn{width:100%;justify-content:space-between;font-weight:500}
+.dd-btn #ddLabel{overflow:hidden;text-overflow:ellipsis}
+.chev{font-size:.7em;color:var(--mut);transition:transform .3s var(--spring)}
+.dd-btn[aria-expanded=true] .chev{transform:rotate(180deg)}
+.dd-list{position:absolute;left:0;top:calc(100% + 6px);width:max-content;min-width:14em;max-width:100%;margin:0;padding:4px;list-style:none;max-height:min(330px,55vh);overflow-y:auto;font-size:.84rem;border-radius:14px;background:var(--pop);transform-origin:top center;animation:drop .25s var(--spring)}
+.dd-list:focus{outline:none}
+@keyframes drop{from{opacity:0;transform:translateY(-4px) scale(.97)}}
+.dd-list li{display:flex;gap:.6em;align-items:center;padding:.34em .7em .34em .5em;white-space:nowrap;border-radius:9px;cursor:pointer;line-height:1.35;transition:background .15s}
+.dd-list li .n{flex:none;font:600 .7rem/1.6 ui-monospace,SFMono-Regular,monospace;color:var(--acc);background:var(--line2);border-radius:6px;min-width:1.9em;text-align:center}
+.dd-list li.active{background:var(--line2)}
+.dd-list li[aria-selected=true]{background:var(--me);font-weight:600}
+.tools [hidden]{display:none}
+main{flex:1;overflow-y:auto;scroll-behavior:smooth;padding:14px 0 8px;-webkit-mask-image:linear-gradient(transparent,#000 18px,#000 calc(100% - 12px),transparent);mask-image:linear-gradient(transparent,#000 18px,#000 calc(100% - 12px),transparent)}
+#log{display:flex;flex-direction:column;gap:12px}
+.msg{max-width:88%;padding:.85em 1.15em;border-radius:20px;animation:pop .45s var(--spring) both;position:relative}
+.msg.me{align-self:flex-end;background:var(--me);border:1px solid var(--line);border-bottom-right-radius:6px;white-space:pre-wrap}
+.msg.me.act{border-color:color-mix(in srgb,var(--acc) 45%,transparent)}
+.msg.me.act::first-line{font-weight:600;color:var(--acc)}
+/* 학습 옵션 칩 */
+.chips{display:flex;gap:6px;margin:0 2px 8px;overflow-x:auto;scrollbar-width:none;padding:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips .btn{font-size:.8rem;font-weight:600;padding:.4em .8em;border-radius:99px;flex:none}
+.chips .btn .ico{font-size:.95em}
+.composer.shake{animation:nudge .45s}
+.msg.me.note{align-self:center;background:var(--line2);border:0;border-radius:99px;padding:.3em .9em;font-size:.82rem;color:var(--mut)}
+.msg.ai{align-self:flex-start;border-bottom-left-radius:6px}
+.msg.ok{box-shadow:var(--shadow),0 0 0 2px color-mix(in srgb,var(--ok) 55%,transparent)}
+.msg.miss{box-shadow:var(--shadow),0 0 0 2px color-mix(in srgb,var(--miss) 55%,transparent);animation:pop .45s var(--spring) both,nudge .5s .35s}
+.msg.err{border-color:color-mix(in srgb,var(--bad) 50%,transparent);animation:pop .4s var(--spring) both,nudge .45s .3s}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.97)}}
+@keyframes nudge{20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.msg>:first-child{margin-top:0}.msg>:last-child{margin-bottom:0}
+.msg h1,.msg h2,.msg h3{font-size:1.02rem;margin:1.1em 0 .4em;line-height:1.4}
+.msg p{margin:.55em 0}.msg ul,.msg ol{margin:.5em 0;padding-left:1.4em}.msg li{margin:.2em 0}
+.msg hr{border:0;border-top:1px solid var(--line2);margin:1em 0}
+.msg code{font:.88em ui-monospace,SFMono-Regular,monospace;background:var(--line2);padding:.12em .38em;border-radius:6px}
+.msg pre{background:var(--line2);padding:.8em 1em;border-radius:12px;overflow-x:auto}.msg pre code{background:none;padding:0}
+.msg table{border-collapse:collapse;display:block;overflow-x:auto;margin:.6em 0}.msg th,.msg td{border:1px solid var(--line2);padding:.35em .7em}
+.msg blockquote{margin:.6em 0;padding-left:.9em;border-left:3px solid var(--acc);color:var(--mut)}
+.katex-display{overflow-x:auto;overflow-y:hidden;padding:.2em 0}
+/* 생각 중 점 세 개 */
+.dots{display:inline-flex;gap:5px;align-items:center;color:var(--mut);font-size:.9rem}
+.dots i{width:7px;height:7px;border-radius:50%;background:var(--acc);animation:bounce 1.1s infinite ease-in-out}
+.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s;margin-right:6px}
+@keyframes bounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-6px);opacity:1}}
+/* 첫 화면 안내 */
+.intro{padding:22px 24px;animation:pop .5s var(--spring) both}
+.intro h2{margin:0 0 .6em;font-size:1.15rem}
+.intro ol{margin:0;padding-left:1.3em}.intro li{margin:.35em 0}
+.intro p{margin:.9em 0 0;color:var(--mut);font-size:.9rem}
+footer{padding:8px 0 calc(14px + env(safe-area-inset-bottom))}
+.composer{display:flex;gap:8px;align-items:flex-end;padding:8px;transition:box-shadow .25s}
+.composer:focus-within{box-shadow:var(--shadow),0 0 0 3px color-mix(in srgb,var(--acc) 30%,transparent)}
+.composer textarea{flex:1;overflow-y:hidden;font:inherit;color:var(--fg);background:transparent;border:0;resize:none;padding:.55em .7em;max-height:40vh;min-height:2.9em;line-height:1.55}
+.composer textarea:focus-visible{outline:none}
+.composer .btn{padding:.7em 1.1em}
+.send-ico{display:inline-block;transition:transform .3s var(--spring)}
+.btn:hover .send-ico{transform:translateX(2px) rotate(-8deg)}
+.hint{margin:6px 6px 0;font-size:.76rem;color:var(--mut);display:flex;justify-content:space-between;gap:8px}
+@media (max-width:600px){.wrap{padding:0 8px}header.glass{margin-top:8px;padding:10px 12px;gap:8px}h1{flex-basis:100%}#lang{margin-left:auto}.tools{gap:6px;padding:6px}.dd{flex-basis:100%}.tools .btn:not(.dd-btn){flex:1;justify-content:center;padding:.5em .6em;font-size:.85rem}.msg{max-width:96%}.hint .k{display:none}}
+</style></head><body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+<div class="wrap"><header class="glass">
+  <h1><span data-t="title"></span><small data-t="tagline"></small></h1>
+  <div class="timer" id="timer"><span class="ring" aria-hidden="true"></span><span id="t"></span></div>
+  <div class="seg" id="lang" role="group" aria-label="Language"><button data-lang="ko">한국어</button><button data-lang="en">EN</button></div>
+</header>
+<div class="tools glass">
+  <select id="lec" hidden></select>
+  <div class="dd"><button class="btn dd-btn" id="ddBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="ddList"><span id="ddLabel"></span><span class="chev" aria-hidden="true">▼</span></button>
+    <ul class="dd-list glass" id="ddList" role="listbox" tabindex="-1" hidden></ul></div>
+  <button class="btn primary" id="start"></button>
+  <a class="btn" id="script" target="_blank" rel="noopener" data-t="transcript"></a>
+  <button class="btn" id="reset" data-t="reset"></button>
+</div></div>
+<main id="main"><div class="wrap"><div id="log" aria-live="polite"></div></div></main>
+<footer><div class="wrap">
+  <div class="chips" id="chips" role="group">
+    <button class="btn" data-act="reexplain"><span class="ico" aria-hidden="true">💡</span><span data-t="actReexplain"></span></button>
+    <button class="btn" data-act="probe"><span class="ico" aria-hidden="true">🎯</span><span data-t="actProbe"></span></button>
+    <button class="btn" data-act="teach"><span class="ico" aria-hidden="true">🧒</span><span data-t="actTeach"></span></button>
+  </div>
+  <div class="composer glass" id="composer"><label class="sr" for="in" data-t="placeholder"></label>
+    <textarea id="in" rows="1"></textarea>
+    <button class="btn primary" id="send"><span data-t="send"></span><span class="send-ico" aria-hidden="true">➤</span></button></div>
+  <div class="hint"><span id="status"></span><span class="k" data-t="hint"></span></div>
+</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dompurify/3.1.6/purify.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script>
+const T={
+ko:{title:"CS329A 4시간 튜터",tagline:"4시간 안에 강의 내용을 ‘써먹는 실력’으로 바꿔 드려요",lecture:"강의",start:"시작하기",restart:"처음부터",transcript:"스크립트 보기",reset:"타이머 초기화",
+ placeholder:"답을 편하게 적어 보세요",send:"보내기",hint:"⌘/Ctrl + Enter로 보내기",thinking:"생각하고 있어요",timeUp:"시간 종료",
+ waitStart:"강의를 고르고 ‘시작하기’를 눌러 주세요",ready:"답을 적어 보내 주세요",startMsg:"시작",switched:"한국어로 바꿨어요",
+ actReexplain:"다시 설명 요청",actProbe:"제대로 익혔는지 확인",actTeach:"아이에게 설명해 보기",chipsLabel:"학습 옵션",
+ tipReexplain:"입력창에 붙여 넣은 글(비어 있으면 튜터의 직전 답변)을 핵심 한 문장부터 다시 설명해 줘요",
+ tipProbe:"정말 익혔는지, 빈틈을 드러내는 질문 5개로 확인해요",tipTeach:"열 살 아이에게 설명하듯 말해 보고, 막히는 곳을 짚어 받아요",
+ needText:"이해가 안 되는 글을 입력창에 붙여 넣은 뒤 다시 눌러 주세요",topicAll:"CS329A 전체 강의",topic:n=>`‘${n}’ 강의 내용`,practiced:" (특히 지금까지 이 대화에서 연습한 부분)",
+ pReexplain:x=>`아래 글이 이해가 안 돼. 설명하기 전에 먼저 알려줘. 이 글에서 어떤 한 문장만 이해하면 나머지도 자연스럽게 이해할 수 있을까? 먼저 그 문장만 설명해줘. 전문 용어 없이 일상적인 비유를 사용해줘. 그다음 정말 이해한 사람만 답할 수 있는 질문 3개를 해줘. 내가 세 질문에 모두 제대로 답하기 전에는 다음으로 넘어가지 마.\n${x}`,
+ pProbe:x=>`나는 ${x}을 이미 익혔다고 생각해. 네가 그 생각이 틀렸다는 걸 증명해줬으면 해. 겉보기에는 간단하지만, 깊이 이해하지 못한 사람의 빈틈을 드러내는 질문 5개를 해줘. 내가 답할 때마다 그 답변을 통해 내 기초 지식에 무엇이 부족한지 짚어줘. 봐주지 마. 내 이해가 피상적이라면 그렇다고 직접 말해줘.`,
+ pTeach:x=>`방금 ${x}을 공부했어. 이제 네가 열 살짜리 아이라고 생각하고 내가 이해한 내용을 설명할게. 내가 뜻도 제대로 모르는 전문 용어를 쓰거나, 논리의 중간 단계를 건너뛰거나, 너무 단순하게 설명해서 내용이 틀려질 때마다 멈춰줘. 설명이 끝나면 이런 실수들이 내가 아직 어떤 부분을 확실히 이해하지 못했다는 뜻인지 정확하게 알려줘.`,switchMsg:"(언어를 한국어로 바꿨어요. 지금 풀고 있는 문제를 한국어로 짧게 다시 말해 주고 이어서 진행해 주세요.)",
+ introH:"이렇게 진행돼요",intro:["강의를 고르고 ‘시작하기’를 누르면, 꼭 먼저 배울 것과 과감히 건너뛰어도 되는 것부터 짚어 드려요.","설명은 길게 하지 않아요. 실수하기 쉬운 상황에 바로 놓이는 문제로 시작해요.","틀려도 정답을 바로 알려 드리지 않아요. 어디서 생각이 어긋났는지 스스로 찾도록 질문을 드리고, 두 번은 직접 고민해 본 뒤에 답을 알려 드려요.","망설임 없이 풀 수 있을 때까지 조금씩 바꾼 문제로 반복해요."],
+ introP:"어디서부터 볼지 모르겠다면 ‘전체 과정’을 골라 보세요. 4시간을 어떻게 쓸지부터 같이 정해 드려요.",
+ askLecture:"강의를 바꾸면 지금까지 나눈 대화가 지워져요. 바꿀까요?",askRestart:"처음부터 다시 시작할까요? 지금까지 나눈 대화는 지워져요.",askReset:"타이머를 4시간으로 되돌릴까요?",
+ err:{bad_request:"요청을 처리하지 못했어요. 다시 한 번 시도해 주세요.",no_claude:"claude 명령을 찾지 못했어요. Claude Code를 설치하고 로그인해 주세요.",timeout:"응답이 너무 오래 걸리고 있어요. 한 번 더 보내 주세요.",claude_error:"Claude Code에서 오류가 났어요.",network:"서버에 연결하지 못했어요. server.py가 실행 중인지 확인해 주세요."},
+ lec:{0:"전체 과정 — 어디부터 볼지 정하기",1:"강의 개요",2:"테스트 타임 컴퓨트 스케일링",3:"견고한 검증",4:"도구·코드 피드백으로 배우기",5:"계획과 다단계 추론",6:"학습 시점 스케일링과 RL 확장",7:"자기 개선과 딥 리서치 에이전트",8:"에이전트 평가와 장기 과제",9:"앞으로의 연구 방향"}},
+en:{title:"CS329A 4-Hour Tutor",tagline:"Turn the lectures into skills you can actually use — in four hours",lecture:"Lecture",start:"Start",restart:"Start over",transcript:"Transcript",reset:"Reset timer",
+ placeholder:"Type your answer…",send:"Send",hint:"⌘/Ctrl + Enter to send",thinking:"Thinking",timeUp:"Time’s up",
+ waitStart:"Pick a lecture and press Start",ready:"Type your answer and send it",startMsg:"Start",switched:"Switched to English",
+ actReexplain:"Explain it again",actProbe:"Did I really learn it?",actTeach:"Explain it to a kid",chipsLabel:"Study options",
+ tipReexplain:"Re-explains the text in the box (or the tutor’s last reply) starting from the one sentence that unlocks it",
+ tipProbe:"Five deceptively simple questions that expose gaps in your understanding",tipTeach:"Explain it like you’re talking to a ten-year-old and get stopped wherever you slip",
+ needText:"Paste the text you don’t understand into the box, then press this again",topicAll:"the whole CS329A course",topic:n=>`the “${n}” lecture`,practiced:" (especially what we’ve practiced in this conversation)",
+ pReexplain:x=>`I don’t understand the text below. Before you explain anything, tell me this first: which single sentence in it, once I understand it, will make the rest fall into place naturally? Explain only that sentence first — no jargon, using an everyday analogy. Then ask me three questions that only someone who truly understands it could answer. Don’t move on until I’ve answered all three correctly.\n${x}`,
+ pProbe:x=>`I think I’ve already mastered ${x}. I want you to prove me wrong. Ask me five questions that look simple on the surface but expose the gaps of someone who doesn’t understand it deeply. Each time I answer, point out what my answer reveals is missing from my fundamentals. Don’t go easy on me — if my understanding is shallow, tell me so directly.`,
+ pTeach:x=>`I just studied ${x}. Now pretend you’re a ten-year-old, and I’ll explain what I understood. Stop me every time I use a technical term I don’t really understand, skip a step in the logic, or oversimplify so much that it becomes wrong. When I’m done, tell me exactly what those mistakes reveal about what I still don’t fully understand.`,switchMsg:"(I switched the language to English. Briefly restate the current problem in English and carry on from there.)",
+ introH:"How this works",intro:["Pick a lecture and press Start. You’ll first hear what to learn first — and what you can safely skip.","No long explanations. You go straight into problems built around the mistakes people usually make.","Get one wrong and you won’t get the answer right away. You’ll get a question that helps you spot where your reasoning slipped, and the answer only comes after two honest tries.","You’ll keep getting slightly changed versions until you can solve them without hesitating."],
+ introP:"Not sure where to begin? Choose “Whole course” and we’ll plan your four hours together first.",
+ askLecture:"Switching lectures will clear this conversation. Switch anyway?",askRestart:"Start over from the beginning? This conversation will be cleared.",askReset:"Reset the timer to four hours?",
+ err:{bad_request:"Something was off with that request. Please try again.",no_claude:"Couldn’t find the claude command. Install Claude Code and log in.",timeout:"This is taking too long. Please send it again.",claude_error:"Claude Code returned an error.",network:"Can’t reach the server. Make sure server.py is running."},
+ lec:{0:"Whole course — plan where to start",1:"Course Overview",2:"Test-Time Compute Scaling",3:"Robust Verification",4:"Learning from Feedback with Tools/Code",5:"Planning and Multi-Step Reasoning",6:"Train-Time Scaling / Scaling RL",7:"Self-Improvement and Deep Research Agents",8:"Agentic Evaluations and Long-Horizon Tasks",9:"Future Research Areas"}}};
+const $=id=>document.getElementById(id);
+const get=k=>{try{return localStorage.getItem(k)}catch{return null}},set=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+const TOTAL=240*6e4;
+let lang=get("lang")||(navigator.language.startsWith("ko")?"ko":"en"),end=+get("end"),msgs=[],busy=false,sid=get("sid")||null,files={};
+if(!T[lang])lang="ko";
+if(!end){end=Date.now()+TOTAL;set("end",end)}
+try{msgs=JSON.parse(get("msgs"))||[]}catch{msgs=[]}
+const t=k=>T[lang][k];
+const save=()=>{set("msgs",JSON.stringify(msgs));set("lec",$("lec").value);set("sid",sid||"")};
+const left=()=>Math.max(0,Math.round((end-Date.now())/6e4));
+const buzz=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch{}};
+
+// 마크다운 + 수식 렌더링. 라이브러리를 못 불러오면(오프라인) 일반 텍스트로 보여준다.
+function render(el,md){
+  if(!window.marked||!window.DOMPurify){el.style.whiteSpace="pre-wrap";el.textContent=md;return}
+  const code=[],math=[];
+  md=md.replace(/```[\s\S]*?```|`[^`\n]+`/g,m=>`\u0001${code.push(m)-1}\u0001`)          // 코드 안의 $는 수식이 아님
+       .replace(/\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]/g,(_,a,b)=>`\u0002${math.push([a??b,true])-1}\u0002`)
+       .replace(/\\\((.+?)\\\)|\$(?!\s)([^$\n]+?)(?<!\s)\$(?!\d)/g,(_,a,b)=>`\u0002${math.push([a??b,false])-1}\u0002`)
+       .replace(/\u0001(\d+)\u0001/g,(_,i)=>code[i]);
+  let html=DOMPurify.sanitize(marked.parse(md,{breaks:true,gfm:true}));
+  html=html.replace(/\u0002(\d+)\u0002/g,(_,i)=>{const[tex,d]=math[i];
+    if(!window.katex)return (d?"$$":"$")+tex.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c])+(d?"$$":"$");
+    return katex.renderToString(tex,{displayMode:d,throwOnError:false})});
+  el.innerHTML=html;
+}
+function verdict(text){const first=text.trimStart().split("\n")[0];return /^[*\s>]*✓/.test(first)?"ok":/✗/.test(first)?"miss":""}
+function add(role,text,extra=""){
+  $("intro")?.remove();
+  const d=document.createElement("div");
+  d.className=`msg ${role}${role=="ai"?" glass":""} ${extra}`;
+  if(role=="ai")render(d,text);else d.textContent=text;
+  $("log").append(d);
+  // 긴 답변은 첫 줄부터 읽도록 답변 머리로, 나머지는 맨 아래로 스크롤
+  requestAnimationFrame(()=>{const m=$("main");m.scrollTop=role=="ai"&&text&&d.offsetHeight>m.clientHeight*.7?d.offsetTop-m.offsetTop-12:m.scrollHeight});return d;
+}
+function intro(){
+  if(msgs.length||$("log").children.length)return;
+  const d=document.createElement("section");d.id="intro";d.className="intro glass";
+  d.append(document.createElement("h2"),document.createElement("ol"),document.createElement("p"));
+  d.children[0].textContent=t("introH");d.children[2].textContent=t("introP");
+  for(const s of t("intro")){const li=document.createElement("li");li.textContent=s;d.children[1].append(li)}
+  $("log").append(d);
+}
+function status(){$("status").textContent=busy?"":msgs.length?t("ready"):t("waitStart")}
+function setBusy(b){busy=b;$("send").disabled=b||!msgs.length||!$("in").value.trim();$("start").disabled=$("lec").disabled=$("ddBtn").disabled=b;$("chips").querySelectorAll("button").forEach(c=>c.disabled=b);status()}
+function tick(){
+  const ms=Math.max(0,end-Date.now()),s=ms/1e3|0;
+  $("t").textContent=s?`${s/3600|0}:${String(s/60%60|0).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`:t("timeUp");
+  $("timer").style.setProperty("--p",ms/TOTAL);
+  $("timer").className="timer"+(s==0?" over":ms<30*6e4?" low":"");
+}
+function applyLang(l){
+  lang=l;set("lang",l);document.documentElement.lang=l;document.title=t("title");
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  $("in").placeholder=t("placeholder");$("start").textContent=msgs.length?t("restart"):t("start");
+  for(const o of $("lec").options)o.textContent=(o.value==0?"":o.value+". ")+t("lec")[o.value];
+  const seg=$("lang");seg.querySelectorAll("button").forEach(b=>{const on=b.dataset.lang==l;b.setAttribute("aria-pressed",on);
+    if(on){seg.style.setProperty("--x",b.offsetLeft+"px");seg.style.setProperty("--w",b.offsetWidth+"px")}});
+  $("chips").setAttribute("aria-label",t("chipsLabel"));for(const c of $("chips").children)c.title=t("tip"+c.dataset.act[0].toUpperCase()+c.dataset.act.slice(1));
+  buildDD();$("intro")?.remove();intro();tick();status();
+}
+function syncScript(){const f=files[$("lec").value];$("script").hidden=!f;if(f)$("script").href=f}
+function clear(){msgs=[];sid=null;$("log").innerHTML="";save();applyLang(lang);setBusy(false)}
+
+// shown: 화면에 보일 문구(언어 전환처럼 실제 요청과 다를 때)
+async function ask(text,shown=text,kind=shown!==text?"note":"",restore=shown===text?text:""){
+  setBusy(true);buzz();add("me",shown,kind);msgs.push({role:"user",content:shown,kind:kind||undefined});save();
+  const w=add("ai","");w.innerHTML=`<span class="dots"><i></i><i></i><i></i>${t("thinking")}</span>`;
+  try{
+    let r;try{r=await fetch("/api",{method:"POST",body:JSON.stringify({lecture:$("lec").value,sid,text,lang,minutes_left:left()})})}
+    catch{throw new Error(t("err").network)}
+    const j=await r.json().catch(()=>({error:"bad_request"}));
+    if(j.error)throw new Error((t("err")[j.error]||j.error)+(j.detail?`\n${j.detail}`:""));
+    sid=j.sid;msgs.push({role:"assistant",content:j.text});save();
+    w.remove();add("ai",j.text,verdict(j.text));
+  }catch(e){
+    msgs.pop();save();w.remove();$("log").lastChild.remove();
+    if(restore&&!$("in").value){$("in").value=restore;grow()}   // 보내지 못한 답은 입력창에 되돌린다
+    const d=add("ai","","err");d.style.whiteSpace="pre-wrap";d.textContent="⚠ "+e.message;
+  }finally{setBusy(false);applyLang(lang);if(msgs.length)$("in").focus()}
+}
+const grow=()=>{const a=$("in");a.style.height="auto";a.style.height=a.scrollHeight+"px";a.style.overflowY=a.scrollHeight>a.clientHeight+1?"auto":"hidden"};
+$("in").oninput=()=>{grow();setBusy(busy)};
+$("start").onclick=()=>{if(busy)return;if(msgs.length&&!confirm(t("askRestart")))return;clear();ask(t("startMsg"))};
+// 학습 옵션: 프롬프트의 빈칸([글]/[기술]/[주제])을 채워서 보낸다
+function topic(){const v=$("lec").value;return (v==0?t("topicAll"):t("topic")(t("lec")[v]))+(msgs.length?t("practiced"):"")}
+$("chips").onclick=e=>{
+  const b=e.target.closest("button[data-act]");if(!b||busy)return;
+  const a=b.dataset.act,label=b.querySelector("[data-t]").textContent;
+  if(a=="reexplain"){
+    const typed=$("in").value.trim(),last=[...msgs].reverse().find(m=>m.role=="assistant")?.content,x=typed||last;
+    if(!x){$("status").textContent=t("needText");$("composer").classList.remove("shake");void $("composer").offsetWidth;$("composer").classList.add("shake");$("in").focus();return}
+    if(typed){$("in").value="";grow()}
+    return ask(t("pReexplain")(x),label+(typed?"\n"+(typed.length>160?typed.slice(0,160)+"…":typed):""),"act",typed);
+  }
+  ask(t(a=="probe"?"pProbe":"pTeach")(topic()),label,"act");
+};
+const send=()=>{const v=$("in").value.trim();if(!v||busy||!msgs.length)return;$("in").value="";grow();ask(v)};
+$("send").onclick=send;$("in").onkeydown=e=>{if(e.key=="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();send()}};
+$("reset").onclick=()=>{if(confirm(t("askReset"))){end=Date.now()+TOTAL;set("end",end);tick()}};
+// 대화 중에 언어를 바꾸면 튜터가 지금 문제를 새 언어로 바로 다시 말해 준다
+$("lang").onclick=e=>{const l=e.target.closest("button")?.dataset.lang;if(!l||l==lang)return;buzz();applyLang(l);if(msgs.length&&!busy)ask(t("switchMsg"),t("switched"))};
+$("lec").onchange=()=>{if(msgs.length&&!confirm(t("askLecture"))){$("lec").value=get("lec");buildDD();return}syncScript();clear()};
+// 강의 드롭다운: 클릭·키보드(↑↓ Home End Enter Esc) 지원, 숨긴 select를 값의 원본으로 쓴다
+const dd={btn:$("ddBtn"),list:$("ddList"),i:0};
+function buildDD(){
+  dd.list.innerHTML="";$("ddBtn").setAttribute("aria-label",t("lecture"));
+  for(const o of $("lec").options){
+    const li=document.createElement("li"),n=document.createElement("span"),x=document.createElement("span");
+    li.id="opt"+o.value;li.setAttribute("role","option");li.dataset.v=o.value;li.setAttribute("aria-selected",o.value==$("lec").value);
+    n.className="n";n.textContent=o.value==0?"All":o.value;x.textContent=t("lec")[o.value];li.append(n,x);dd.list.append(li);
+  }
+  $("ddLabel").textContent=$("lec").selectedOptions[0]?.textContent||"";
+}
+function hl(i){const items=dd.list.children;if(!items.length)return;dd.i=(i+items.length)%items.length;
+  [...items].forEach((li,k)=>li.classList.toggle("active",k==dd.i));dd.list.setAttribute("aria-activedescendant",items[dd.i].id);items[dd.i].scrollIntoView({block:"nearest"})}
+function openDD(){if(dd.btn.disabled)return;dd.list.hidden=false;dd.btn.setAttribute("aria-expanded",true);hl($("lec").selectedIndex);dd.list.focus()}
+function closeDD(focus){if(dd.list.hidden)return;dd.list.hidden=true;dd.btn.setAttribute("aria-expanded",false);if(focus)dd.btn.focus()}
+function choose(v){closeDD(true);if(v==$("lec").value)return;buzz();$("lec").value=v;$("lec").dispatchEvent(new Event("change"));buildDD()}
+dd.btn.onclick=()=>dd.list.hidden?openDD():closeDD();
+dd.btn.onkeydown=e=>{if(e.key=="ArrowDown"||e.key=="ArrowUp"){e.preventDefault();openDD()}};
+dd.list.onclick=e=>{const li=e.target.closest("li");if(li)choose(li.dataset.v)};
+dd.list.onmousemove=e=>{const li=e.target.closest("li");if(li)hl([...dd.list.children].indexOf(li))};
+dd.list.onkeydown=e=>{const k=e.key,n=dd.list.children.length;
+  if(k=="ArrowDown")hl(dd.i+1);else if(k=="ArrowUp")hl(dd.i-1);else if(k=="Home")hl(0);else if(k=="End")hl(n-1);
+  else if(k=="Enter"||k==" ")choose(dd.list.children[dd.i].dataset.v);else if(k=="Escape")closeDD(true);else if(k=="Tab")closeDD();else return;
+  e.preventDefault()};
+document.addEventListener("pointerdown",e=>{if(!e.target.closest(".dd"))closeDD()});
+// 누르는 순간 바로 눌린 느낌(터치 포함)
+const unpress=()=>document.querySelectorAll(".pressed").forEach(b=>b.classList.remove("pressed"));
+document.addEventListener("pointerdown",e=>{const b=e.target.closest(".btn");if(b&&!b.disabled)b.classList.add("pressed")});
+document.addEventListener("pointerup",unpress);document.addEventListener("pointercancel",unpress);
+setInterval(tick,500);
+applyLang(lang);setBusy(false);
+fetch("/api/lectures").then(r=>r.json()).then(L=>{
+  for(const k of Object.keys(L).sort((a,b)=>a-b)){$("lec").add(new Option("",k));files[k]=L[k].file}
+  const l=get("lec");if(l!==null&&L[l])$("lec").value=l;
+  if(msgs.length){$("log").innerHTML="";for(const m of msgs)add(m.role=="user"?"me":"ai",m.content,m.role=="assistant"?verdict(m.content):m.kind||(m.note?"note":""))}
+  syncScript();applyLang(lang);setBusy(false);
+}).catch(()=>{const d=add("ai","","err");d.textContent="⚠ "+t("err").network});
+</script></body></html>
