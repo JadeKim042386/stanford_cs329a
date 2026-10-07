@@ -8,14 +8,6 @@ It runs on **Claude Code in headless mode** (`claude -p`), so it needs no API ke
 
 ![A wrong answer gets a counterexample question instead of the answer](docs/screenshots/chat-light.png)
 
-## Screenshots
-
-| Start screen and lecture picker | Dark mode |
-|---|---|
-| ![Start screen with the lecture picker open](docs/screenshots/start.png) | ![The same session in dark mode](docs/screenshots/chat-dark.png) |
-
-<p align="center"><img src="docs/screenshots/mobile-dark.png" alt="Mobile layout in dark mode" width="300"></p>
-
 ## Quick start
 
 ```bash
