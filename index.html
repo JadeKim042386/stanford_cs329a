@@ -112,7 +112,7 @@ footer{padding:8px 0 calc(14px + env(safe-area-inset-bottom))}
 <script>
 const T={
 ko:{title:"CS329A 4시간 튜터",tagline:"4시간 안에 강의 내용을 ‘써먹는 실력’으로 바꿔 드려요",lecture:"강의",start:"시작하기",restart:"처음부터",transcript:"스크립트 보기",reset:"타이머 초기화",
- placeholder:"답을 편하게 적어 보세요",send:"보내기",hint:"⌘/Ctrl + Enter로 보내기",thinking:"생각하고 있어요",timeUp:"시간 종료",
+ placeholder:"답을 편하게 적어 보세요",send:"보내기",hint:"Enter로 보내기 · Shift + Enter로 줄바꿈",thinking:"생각하고 있어요",timeUp:"시간 종료",
  waitStart:"강의를 고르고 ‘시작하기’를 눌러 주세요",ready:"답을 적어 보내 주세요",startMsg:"시작",switched:"한국어로 바꿨어요",
  actReexplain:"다시 설명 요청",actProbe:"제대로 익혔는지 확인",actTeach:"아이에게 설명해 보기",chipsLabel:"학습 옵션",
  tipReexplain:"입력창에 붙여 넣은 글(비어 있으면 튜터의 직전 답변)을 핵심 한 문장부터 다시 설명해 줘요",
@@ -127,7 +127,7 @@ ko:{title:"CS329A 4시간 튜터",tagline:"4시간 안에 강의 내용을 ‘�
  err:{bad_request:"요청을 처리하지 못했어요. 다시 한 번 시도해 주세요.",no_claude:"claude 명령을 찾지 못했어요. Claude Code를 설치하고 로그인해 주세요.",timeout:"응답이 너무 오래 걸리고 있어요. 한 번 더 보내 주세요.",claude_error:"Claude Code에서 오류가 났어요.",network:"서버에 연결하지 못했어요. server.py가 실행 중인지 확인해 주세요."},
  lec:{0:"전체 과정 — 어디부터 볼지 정하기",1:"강의 개요",2:"테스트 타임 컴퓨트 스케일링",3:"견고한 검증",4:"도구·코드 피드백으로 배우기",5:"계획과 다단계 추론",6:"학습 시점 스케일링과 RL 확장",7:"자기 개선과 딥 리서치 에이전트",8:"에이전트 평가와 장기 과제",9:"앞으로의 연구 방향"}},
 en:{title:"CS329A 4-Hour Tutor",tagline:"Turn the lectures into skills you can actually use — in four hours",lecture:"Lecture",start:"Start",restart:"Start over",transcript:"Transcript",reset:"Reset timer",
- placeholder:"Type your answer…",send:"Send",hint:"⌘/Ctrl + Enter to send",thinking:"Thinking",timeUp:"Time’s up",
+ placeholder:"Type your answer…",send:"Send",hint:"Enter to send · Shift + Enter for a new line",thinking:"Thinking",timeUp:"Time’s up",
  waitStart:"Pick a lecture and press Start",ready:"Type your answer and send it",startMsg:"Start",switched:"Switched to English",
  actReexplain:"Explain it again",actProbe:"Did I really learn it?",actTeach:"Explain it to a kid",chipsLabel:"Study options",
  tipReexplain:"Re-explains the text in the box (or the tutor’s last reply) starting from the one sentence that unlocks it",
@@ -240,7 +240,8 @@ $("chips").onclick=e=>{
   ask(t(a=="probe"?"pProbe":"pTeach")(topic()),label,"act");
 };
 const send=()=>{const v=$("in").value.trim();if(!v||busy||!msgs.length)return;$("in").value="";grow();ask(v)};
-$("send").onclick=send;$("in").onkeydown=e=>{if(e.key=="Enter"&&(e.metaKey||e.ctrlKey)){e.preventDefault();send()}};
+$("send").onclick=send;// Enter: 보내기, Shift+Enter: 줄바꿈. 한글 입력 조합 중의 Enter는 글자 확정이므로 보내지 않는다
+$("in").onkeydown=e=>{if(e.key=="Enter"&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229){e.preventDefault();send()}};
 $("reset").onclick=()=>{if(confirm(t("askReset"))){end=Date.now()+TOTAL;set("end",end);tick()}};
 // 대화 중에 언어를 바꾸면 튜터가 지금 문제를 새 언어로 바로 다시 말해 준다
 $("lang").onclick=e=>{const l=e.target.closest("button")?.dataset.lang;if(!l||l==lang)return;buzz();applyLang(l);if(msgs.length&&!busy)ask(t("switchMsg"),t("switched"))};
