@@ -2,7 +2,7 @@
 
 A local web tutor that turns the nine lectures of **Stanford CS329A — Self-Improving AI Agents** ([YouTube playlist](https://www.youtube.com/watch?v=6YnLB0XbTnI&list=PLangBM27OtEA)) into skills you can actually use, in a single four-hour session.
 
-It doesn't lecture you. It works Socratically: it drops you straight into situations where people usually get things wrong, answers your mistakes with questions instead of answers, and only reveals an answer after two honest attempts.
+You don't need to have watched the lectures. It doesn't lecture you either. It works Socratically: it drops you straight into situations where people usually get things wrong, answers your mistakes with questions instead of answers, and only reveals an answer after two honest attempts.
 
 It runs on **Claude Code in headless mode** (`claude -p`), so it needs no API key. It uses the Claude Code account you're already logged into.
 
@@ -28,10 +28,11 @@ Requirements: Python 3.10+ and [Claude Code](https://claude.com/claude-code), in
    - the 2–3 things to learn first, in order
    - what you can safely ignore
    - one exercise that, done just once, puts you ahead of 70% of people who've been studying for months
-3. **Straight into problems.** No concept explanations. You get one concrete scenario at a time, built around a common mistake.
-4. **Wrong answers get questions, not answers.** A counterexample, an edge case, a "what if…?". Each miss is marked `Attempt k/2 ✗`, and the answer only comes after two failed attempts.
-5. **Right answers get variations.** You keep getting variations with new traps until you answer without hesitating. A correct answer with wrong reasoning doesn't count.
-6. **The clock matters.** The remaining time is sent with every message. Under 30 minutes, the tutor focuses on locking in the single most important skill. At zero, it wraps up with a three-line checklist.
+3. **Just enough to start, then straight into problems.** No concept lectures. Before each new skill you get a 3–5 line 🧰 card: what it is in plain words, a tiny worked example with numbers, and when you'd use it. It never contains the trap or the answer. Then you get one concrete scenario at a time, built around a common mistake.
+4. **Missing background doesn't count as a miss.** If you're stuck because you don't know a term or formula, the tutor fills in just that piece and lets you retry.
+5. **Wrong answers get questions, not answers.** A counterexample, an edge case, a "what if…?". Each miss is marked `Attempt k/2 ✗`, and the answer only comes after two failed attempts.
+6. **Right answers get variations.** You keep getting variations with new traps until you answer without hesitating. A correct answer with wrong reasoning doesn't count.
+7. **The clock matters.** The remaining time is sent with every message. Under 30 minutes, the tutor focuses on locking in the single most important skill. At zero, it wraps up with a three-line checklist.
 
 ### Study options
 
